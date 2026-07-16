@@ -1,0 +1,16 @@
+{
+  "name": "wrightops-bounty-red-flag-card",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Public release and validation wrapper for the WrightOps Bounty Red-Flag Card.",
+  "type": "module",
+  "scripts": {
+    "build": "npm --prefix bounty-red-flag-card run build:release",
+    "test": "npm --prefix bounty-red-flag-card test",
+    "validate": "npm --prefix bounty-red-flag-card run validate"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "license": "MIT"
+}

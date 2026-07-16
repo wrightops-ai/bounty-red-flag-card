@@ -1,0 +1,64 @@
+name: Bounty GO/NO-GO Review
+description: Request written scope for a $49 evidence-backed review of one public software bounty.
+title: "[Review] "
+labels:
+  - review-request
+body:
+  - type: markdown
+    attributes:
+      value: |
+        This request is public. Submit one public software bounty or listing only.
+
+        Do **not** post email addresses, credentials, private code, customer data, payment information, wallet secrets, or production details. Payment is requested only after WrightOps confirms scope in writing.
+  - type: input
+    id: target
+    attributes:
+      label: Canonical public bounty URL
+      description: Link directly to the issue or listing that states the work.
+      placeholder: https://github.com/owner/repository/issues/123
+    validations:
+      required: true
+  - type: input
+    id: platform_rules
+    attributes:
+      label: Public payout or platform-rules URL
+      description: Add the authoritative rules page when the bounty uses a platform.
+      placeholder: https://example.com/terms-or-payout-rules
+    validations:
+      required: false
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision you need
+      description: State the concrete uncertainty you want the review to resolve.
+      placeholder: Is this funded, still claimable, and economically rational for a two-hour implementation?
+    validations:
+      required: true
+  - type: input
+    id: deadline
+    attributes:
+      label: Public deadline
+      description: Enter the published deadline or write "Unknown".
+      placeholder: Unknown
+    validations:
+      required: true
+  - type: textarea
+    id: known_facts
+    attributes:
+      label: Public facts already checked
+      description: List links, claimants, linked pull requests, or rules you have already inspected.
+    validations:
+      required: false
+  - type: checkboxes
+    id: boundaries
+    attributes:
+      label: Scope acknowledgements
+      options:
+        - label: The target and all evidence supplied here are public.
+          required: true
+        - label: I understand this request does not claim, reserve, or perform the bounty.
+          required: true
+        - label: I understand the review does not guarantee eligibility, acceptance, payment, or profit.
+          required: true
+        - label: I will not pay until WrightOps confirms scope and timing in writing.
+          required: true

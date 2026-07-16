@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Private or sensitive concern
+    url: mailto:zach@zachwright.xyz
+    about: Do not post secrets, private code, customer data, payment details, or wallet keys publicly.
