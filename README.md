@@ -6,6 +6,8 @@ bond, buy equipment, or share access.
 The card is free, offline, print-ready, and intentionally skeptical. Unknown
 facts count as flags until authoritative evidence resolves them.
 
+![Bounty Red-Flag Card showing the twelve preflight checks](docs/bounty-red-flag-card-preview.png)
+
 ## Use the free card
 
 - [Open the Markdown card](bounty-red-flag-card/BOUNTY-RED-FLAG-CARD.md)

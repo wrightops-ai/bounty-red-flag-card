@@ -35,3 +35,15 @@ test("release notes use real Markdown paragraphs", async () => {
   assert.doesNotMatch(notes, /\\n/);
   assert.match(notes, /no bounty claim/);
 });
+
+test("README preview is a checked 1200 by 800 PNG", async () => {
+  const readme = await readFile(new URL("README.md", root), "utf8");
+  const preview = await readFile(
+    new URL("docs/bounty-red-flag-card-preview.png", root),
+  );
+
+  assert.match(readme, /docs\/bounty-red-flag-card-preview\.png/);
+  assert.equal(preview.subarray(1, 4).toString("ascii"), "PNG");
+  assert.equal(preview.readUInt32BE(16), 1200);
+  assert.equal(preview.readUInt32BE(20), 800);
+});
