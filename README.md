@@ -37,8 +37,9 @@ For one public software bounty or listing, the review delivers:
 - a bounded scope and expected-return estimate;
 - a clear `GO`, `HOLD`, or `NO-GO` recommendation with unresolved facts named.
 
-[Request scope for a $49 review](https://github.com/wrightops-ai/bounty-red-flag-card/issues/new?template=bounty-review.yml)
-or read the [complete service terms](docs/bounty-go-no-go-review.md).
+[Open the public GitHub request form (sign-in required)](https://github.com/wrightops-ai/bounty-red-flag-card/issues/new?template=bounty-review.yml),
+inspect the [sample GO/HOLD/NO-GO report](docs/sample-bounty-go-no-go-review.md),
+or read the [complete service and refund terms](docs/bounty-go-no-go-review.md).
 
 Do not pay before WrightOps confirms the public target, deliverable, timing, and
 fit in writing. Never put credentials, private code, customer data, email

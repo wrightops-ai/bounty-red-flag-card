@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "build": "npm --prefix bounty-red-flag-card run build:release",
-    "test": "npm --prefix bounty-red-flag-card test",
+    "test": "npm --prefix bounty-red-flag-card test && node --test test/*.test.mjs",
     "validate": "npm --prefix bounty-red-flag-card run validate"
   },
   "engines": {
