@@ -1,0 +1,20 @@
+{
+  "subject": {
+    "label": "Example public software bounty",
+    "source": "https://example.com/public-bounty"
+  },
+  "answers": {
+    "funding": "clear",
+    "availability": "clear",
+    "competition": "unknown",
+    "acceptance": "clear",
+    "authority": "clear",
+    "upfront-cost": "clear",
+    "access": "clear",
+    "third-party": "clear",
+    "scope": "unknown",
+    "baseline": "clear",
+    "rights": "clear",
+    "economics": "unknown"
+  }
+}

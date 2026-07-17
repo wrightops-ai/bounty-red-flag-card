@@ -1,22 +1,30 @@
 # Bounty Red-Flag Card
 
-Twelve checks to run before you claim a software bounty, write code, pay a
-bond, buy equipment, or share access.
+An executable, offline preflight for software bounties: twelve checks to run
+before you claim work, write code, pay a bond, buy equipment, or share access.
 
-The card is free, offline, print-ready, and intentionally skeptical. Unknown
-facts count as flags until authoritative evidence resolves them.
+The browser app, CLI, Markdown card, and print card are free and intentionally
+skeptical. Unknown facts count as flags until authoritative evidence resolves
+them.
 
-![Bounty Red-Flag Card showing the twelve preflight checks](docs/bounty-red-flag-card-preview.png)
+![Interactive Bounty Red-Flag Card showing a Hold and Verify result](docs/bounty-red-flag-card-preview.png)
 
-## Use the free card
+## Run the free tool
 
+- [Launch the interactive browser app](https://wrightops-ai.github.io/bounty-red-flag-card/)
+- [Open the self-contained app source](bounty-red-flag-card/index.html)
+- [Run the zero-dependency CLI](bounty-red-flag-card/README.md#run-the-cli)
 - [Open the Markdown card](bounty-red-flag-card/BOUNTY-RED-FLAG-CARD.md)
 - [Open the print-ready HTML card](bounty-red-flag-card/BOUNTY-RED-FLAG-CARD.html)
 - [Download the latest release](https://github.com/wrightops-ai/bounty-red-flag-card/releases/latest)
 - [Verify release checksums](bounty-red-flag-card/dist/SHA256SUMS)
 
-The HTML version is self-contained. It loads no scripts, fonts, images,
-analytics, or network resources.
+The interactive app is a self-contained file with inline logic and no runtime
+network requests. The separate print HTML remains script-free. Neither tool
+loads fonts, images, analytics, or external resources.
+
+No input is uploaded, stored, or transmitted. The CLI requires Node.js 20 or
+newer but no package installation.
 
 ## What it checks
 
@@ -24,8 +32,8 @@ The preflight covers funding, availability, competition, acceptance criteria,
 payment authority, upfront costs, access requests, third-party dependencies,
 hidden scope, project health, rights and compliance, and expected hourly return.
 
-The result is triage—not proof that a bounty is safe, legal, profitable, or
-payable.
+The result is triage—not proof that a bounty is safe, legal, compliant,
+profitable, eligible, acceptable, or payable.
 
 ## Want an evidence-backed decision?
 

@@ -1,57 +1,121 @@
 # Bounty Red-Flag Card
 
-A free, one-page preflight check for software bounties. Use it before claiming work, opening a pull request, paying a bond, purchasing equipment, or sharing credentials.
+A free, executable preflight tool for software bounties. Use it before claiming
+work, opening a pull request, paying a bond, purchasing equipment, or sharing
+credentials.
+
+The browser app and CLI use the same 12 evidence states and decision rule.
+Unknown evidence counts as a flag. The best possible result is **continue due
+diligence**—never “safe,” “guaranteed,” or an automatic GO.
+
+## Run the browser app
+
+Open [`index.html`](index.html) directly in a current browser. It is one
+self-contained file and works from `file://`; no server is required.
+
+The app:
+
+- keeps all inputs in the current browser tab;
+- performs no network requests and has no telemetry;
+- starts every fact at `unknown`;
+- updates the verdict as evidence is marked `clear`, `present`, or `unknown`;
+- copies or downloads a deterministic JSON report locally.
+
+The optional bounty label and public source URL are included only in the local
+report. They are not saved or transmitted.
+
+## Run the CLI
+
+Requires Node.js 20 or newer and no package installation.
+
+```sh
+node cli.mjs --help
+node cli.mjs --input example-assessment.json
+node cli.mjs --input example-assessment.json --json
+cat example-assessment.json | node cli.mjs --input - --json
+```
+
+Generate a complete input template or list the checks:
+
+```sh
+node cli.mjs --sample > my-assessment.json
+node cli.mjs --list
+```
+
+Input uses one of three values for each flag id:
+
+```json
+{
+  "subject": {
+    "label": "Issue #123 — parser fix",
+    "source": "https://github.com/owner/repository/issues/123"
+  },
+  "answers": {
+    "funding": "clear",
+    "availability": "unknown",
+    "competition": "flag"
+  }
+}
+```
+
+Missing answers become `unknown`. Invalid values and unknown flag ids fail with
+exit code 2. Assessment verdicts are results, not process failures, so valid
+assessments exit 0.
 
 ## Included
 
-- `BOUNTY-RED-FLAG-CARD.md` — portable Markdown version
-- `BOUNTY-RED-FLAG-CARD.html` — self-contained print-ready version
-- `product-manifest.json` — product metadata
-- Offline validation tests
-
-## Use
-
-1. Open the issue, listing, repository, and payout rules.
-2. Mark every flag that is present or cannot be disproved from authoritative evidence.
-3. Apply the decision rule at the bottom of the card.
-4. Save the evidence links separately; the card is a preflight aid, not an evidence archive.
+- `index.html` — self-contained interactive browser app
+- `cli.mjs` — deterministic Node.js CLI
+- `lib/assessment.mjs` — shared CLI decision engine and check definitions
+- `example-assessment.json` — synthetic example input
+- `BOUNTY-RED-FLAG-CARD.md` — portable Markdown card
+- `BOUNTY-RED-FLAG-CARD.html` — script-free print-ready card
+- `product-manifest.json` — product and reproducible-release metadata
 
 ## Print
 
-Open `BOUNTY-RED-FLAG-CARD.html` in a browser and choose **Print**:
+Open `BOUNTY-RED-FLAG-CARD.html` and choose **Print**. That artifact remains a
+separate, script-free one-page card with all styles inline and no fonts, images,
+analytics, or network resources.
 
-- Paper: Letter or A4
-- Scale: 100%
-- Margins: Default or minimum
-- Background graphics: On, if available
-- Headers and footers: Off
+## Decision rule
 
-The HTML contains all styles inline and loads no fonts, scripts, images, analytics, or network resources.
+Blocking unknowns or present blocking facts produce `HARD_STOP`. Otherwise:
 
-## Validate
+| Flags marked or unknown | Preflight result |
+| ---: | --- |
+| 0–1 | `CONTINUE_DUE_DILIGENCE`—not a GO |
+| 2–3 | `HOLD_VERIFY` |
+| 4+ | `DEFAULT_NO_GO` |
+
+The four tool-level blocking checks are funding, availability, upfront cost,
+and private or production access. “Unknown” stays blocking until authoritative
+evidence resolves it.
+
+## Validate and build
 
 ```sh
 npm test
 npm run validate
-```
-
-Validation confirms that both formats contain the same 12 checks, the HTML has print CSS, and no external resources are referenced.
-
-## Reproducible release
-
-```sh
 npm run build:release
 (cd dist && shasum -a 256 -c SHA256SUMS)
 ```
 
-The build produces versioned ZIP and tar.gz archives with a fixed timestamp, normalized permissions, zero tar uid/gid, empty tar owner names, and no host-specific archive metadata. `product-manifest.json` records the exact source inventory and per-file SHA-256 values. The manifest itself is included in each archive but omits its own hash to avoid an impossible self-reference.
+The release builder fixes timestamps, permissions, archive ownership metadata,
+and file order so repeated builds are byte-identical. The manifest records the
+exact source inventory and file hashes.
 
 ## Boundaries
 
-This card does not verify payment, eligibility, ownership, legality, security, or profitability. A low count is permission to continue due diligence—not proof that a bounty is safe.
+This tool does not verify payment, eligibility, ownership, legality, security,
+compliance, acceptance, or profitability. It does not claim a bounty, contact a
+payer, execute third-party code, store evidence, or authorize access.
 
-Do not use the card to justify spam, speculative mass claims, unauthorized access, deceptive submissions, or upfront spending that you cannot independently justify.
+Do not use it to justify spam, speculative mass claims, unauthorized access,
+deceptive submissions, or upfront spending you cannot independently justify.
 
 ## License
 
-MIT. You may copy, print, adapt, redistribute, or resell the card with the included license notice; purchase does not transfer exclusive rights. WrightOps is identified as an owner-authorized operating brand, not as an incorporated entity.
+MIT. You may copy, print, adapt, redistribute, or resell the tool with the
+included license notice. Purchase does not transfer exclusive rights. WrightOps
+is an owner-authorized operating brand, not an incorporated-entity claim.

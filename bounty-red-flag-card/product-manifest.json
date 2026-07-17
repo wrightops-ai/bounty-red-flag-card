@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "product": "Bounty Red-Flag Card",
   "slug": "bounty-red-flag-card",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "price": {
     "amount": 0,
     "currency": "USD",
@@ -31,7 +31,10 @@
   },
   "formats": [
     "Markdown",
-    "Print-ready HTML"
+    "Print-ready HTML",
+    "Interactive offline HTML",
+    "Node.js CLI",
+    "JSON report"
   ],
   "audience": [
     "Independent developers",
@@ -71,6 +74,30 @@
         "archiveMode": "0644"
       },
       {
+        "path": "cli.mjs",
+        "sha256": "2886ffaf586d93e6fc3c3a69853e736209ad44886eb610a27bbb8931bd60f86f",
+        "bytes": 4298,
+        "archiveMode": "0755"
+      },
+      {
+        "path": "example-assessment.json",
+        "sha256": "fad23c216af55e33487f8fba0864e90aece29ab545397246636bbcad246df96c",
+        "bytes": 455,
+        "archiveMode": "0644"
+      },
+      {
+        "path": "index.html",
+        "sha256": "a5564a30fefcdd2b603ef3283b0af3bdf9a105366c403590e1dc300ad1ab2f78",
+        "bytes": 44289,
+        "archiveMode": "0644"
+      },
+      {
+        "path": "lib/assessment.mjs",
+        "sha256": "3d3bb8b8cbce275ac8a8945bd96c7220126d51bfc5654b92b0ec09113506604d",
+        "bytes": 6758,
+        "archiveMode": "0644"
+      },
+      {
         "path": "LICENSE",
         "sha256": "2e4fe3fe016440f99803bbf3adfa31251ae4f4df4b33497d3d01293d5570acae",
         "bytes": 1079,
@@ -78,38 +105,38 @@
       },
       {
         "path": "package.json",
-        "sha256": "b68265257a30704aeda242cdbc3faa59b0374d92ad14f76d7d0f7f11bbd3a6e2",
-        "bytes": 432,
+        "sha256": "3cdb48ad31ed7411800361f311410d17282b5ba6e0d9758d763a6866df85d336",
+        "bytes": 515,
         "archiveMode": "0644"
       },
       {
         "path": "README.md",
-        "sha256": "efc09b13e8be41151464631a249b4e7cda120f578cbc18aafab44bf7236134c6",
-        "bytes": 2311,
+        "sha256": "25811410783a800843f9cae7e39231fa8505c24740f96d2caec588042132b663",
+        "bytes": 3898,
         "archiveMode": "0644"
       },
       {
         "path": "scripts/validate.mjs",
-        "sha256": "c81c21e0d4871d0ce905c352e0f463ca2158659430666a25bee2ad31387e87f1",
-        "bytes": 2545,
+        "sha256": "f5e43d4235867870907c936729f6a4daadc6f3365999c8e33316af57420476b6",
+        "bytes": 5275,
         "archiveMode": "0644"
       },
       {
         "path": "test/product.test.mjs",
-        "sha256": "f0a62d7cc1708f5531997f463038ac1a201ae9658b4fdb6a0c7190a9e2deb978",
-        "bytes": 2273,
+        "sha256": "dcd647719e42dc5e76226c54c6fc5d748f7db1131a5d8e39332b29f25d8ad9a9",
+        "bytes": 6647,
         "archiveMode": "0644"
       }
     ],
     "archives": [
       {
-        "name": "bounty-red-flag-card-v1.0.0.zip",
+        "name": "bounty-red-flag-card-v1.1.0.zip",
         "format": "zip",
         "rootDirectory": "bounty-red-flag-card",
         "buildCommand": "npm run build:release"
       },
       {
-        "name": "bounty-red-flag-card-v1.0.0.tar.gz",
+        "name": "bounty-red-flag-card-v1.1.0.tar.gz",
         "format": "tar.gz",
         "rootDirectory": "bounty-red-flag-card",
         "buildCommand": "npm run build:release"
