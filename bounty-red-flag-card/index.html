@@ -1,0 +1,1275 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A private, offline 12-point preflight tool for evaluating software bounty risk.">
+  <meta name="color-scheme" content="light">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23c3222a'/%3E%3Cpath d='M8 9h3l2 9 3-9h2l3 9 2-9h3l-4 14h-2l-3-8-3 8h-2z' fill='white'/%3E%3C/svg%3E">
+  <title>Bounty Red-Flag Card — Offline Preflight Tool</title>
+  <style>
+    :root {
+      --ink: #161616;
+      --paper: #fbfaf7;
+      --canvas: #e9e6df;
+      --surface: #ffffff;
+      --muted: #686761;
+      --faint: #8c8a83;
+      --line: #d6d2c9;
+      --line-dark: #343434;
+      --signal: #c3222a;
+      --signal-dark: #94181e;
+      --signal-soft: #f8e6e5;
+      --amber: #9c5a08;
+      --amber-soft: #fff0cf;
+      --clear: #17633d;
+      --clear-soft: #e5f2e9;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      background: var(--canvas);
+      color: var(--ink);
+      font-family: var(--sans);
+      scroll-behavior: smooth;
+    }
+
+    body {
+      min-width: 320px;
+      margin: 0;
+      background:
+        linear-gradient(90deg, rgb(22 22 22 / 3%) 1px, transparent 1px) 0 0 / 28px 28px,
+        var(--canvas);
+    }
+
+    button, input { font: inherit; }
+
+    button, a { -webkit-tap-highlight-color: transparent; }
+
+    a { color: inherit; }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: 10px;
+      left: 10px;
+      z-index: 100;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 2px solid var(--signal);
+      transform: translateY(-160%);
+    }
+
+    .skip-link:focus { transform: translateY(0); }
+
+    .topbar {
+      position: relative;
+      z-index: 5;
+      border-bottom: 1px solid #000;
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .topbar-inner {
+      width: min(1440px, calc(100% - 48px));
+      min-height: 58px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 760;
+      letter-spacing: 0.025em;
+    }
+
+    .brand-mark {
+      display: grid;
+      width: 28px;
+      height: 28px;
+      place-items: center;
+      background: var(--signal);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .brand-sub {
+      color: #a7a7a7;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+    }
+
+    .top-links {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      font-family: var(--mono);
+      font-size: 11px;
+    }
+
+    .top-links a {
+      color: #d9d9d9;
+      text-decoration-color: #6a6a6a;
+      text-underline-offset: 4px;
+    }
+
+    .top-links a:hover { color: #fff; }
+
+    .shell {
+      width: min(1440px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 42px 0 64px;
+    }
+
+    .intro {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 48px;
+      align-items: end;
+      margin-bottom: 30px;
+    }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0 0 13px;
+      color: var(--signal-dark);
+      font-family: var(--mono);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 3px;
+      background: var(--signal);
+    }
+
+    h1 {
+      max-width: 850px;
+      margin: 0;
+      font-size: clamp(36px, 5vw, 68px);
+      line-height: 0.95;
+      letter-spacing: -0.055em;
+    }
+
+    .intro-note {
+      margin: 0;
+      padding: 18px 0 2px 20px;
+      border-left: 1px solid #aca89e;
+      color: #45443f;
+      font-size: 14px;
+      line-height: 1.55;
+    }
+
+    .intro-note strong { color: var(--ink); }
+
+    .privacy-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 12px;
+      color: var(--clear);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .privacy-line::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--clear);
+      box-shadow: 0 0 0 3px var(--clear-soft);
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: 350px minmax(0, 1fr);
+      gap: 18px;
+      align-items: start;
+    }
+
+    .result-panel {
+      position: sticky;
+      top: 18px;
+      overflow: hidden;
+      min-height: 560px;
+      background: var(--ink);
+      border-top: 5px solid var(--signal);
+      color: #fff;
+      box-shadow: 0 18px 45px rgb(24 22 18 / 14%);
+    }
+
+    .result-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 22px 14px;
+      border-bottom: 1px solid var(--line-dark);
+      color: #aaa;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .result-head span:last-child { color: #fff; }
+
+    .score-block {
+      padding: 28px 22px 22px;
+    }
+
+    .score-label {
+      color: #a6a6a6;
+      font-family: var(--mono);
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .score {
+      display: flex;
+      align-items: flex-end;
+      gap: 7px;
+      margin: 6px 0 8px;
+      font-family: var(--mono);
+    }
+
+    .score strong {
+      font-size: 88px;
+      font-weight: 500;
+      line-height: 0.9;
+      letter-spacing: -0.09em;
+    }
+
+    .score span {
+      padding-bottom: 7px;
+      color: #8e8e8e;
+      font-size: 17px;
+    }
+
+    .meter {
+      width: 100%;
+      height: 3px;
+      margin: 20px 0 0;
+      overflow: hidden;
+      background: #424242;
+    }
+
+    .meter-fill {
+      width: 0;
+      height: 100%;
+      background: var(--signal);
+      transition: width 240ms ease;
+    }
+
+    .verdict-block {
+      padding: 20px 22px;
+      border-top: 1px solid var(--line-dark);
+      border-bottom: 1px solid var(--line-dark);
+    }
+
+    .verdict-code {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      margin-bottom: 14px;
+      padding: 4px 8px;
+      background: var(--signal);
+      color: #fff;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+
+    .verdict-block h2 {
+      margin: 0 0 8px;
+      font-size: 25px;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+    }
+
+    .verdict-block p {
+      min-height: 62px;
+      margin: 0;
+      color: #bcbcbc;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .tally {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-bottom: 1px solid var(--line-dark);
+    }
+
+    .tally-item {
+      padding: 14px 12px;
+      border-right: 1px solid var(--line-dark);
+      text-align: center;
+    }
+
+    .tally-item:last-child { border-right: 0; }
+
+    .tally-item strong {
+      display: block;
+      font-family: var(--mono);
+      font-size: 20px;
+      font-weight: 500;
+    }
+
+    .tally-item span {
+      color: #8c8c8c;
+      font-family: var(--mono);
+      font-size: 9px;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .result-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 18px 22px 8px;
+    }
+
+    .action-button {
+      min-height: 40px;
+      border: 1px solid #5b5b5b;
+      border-radius: 0;
+      background: transparent;
+      color: #fff;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      transition: background 140ms ease, border-color 140ms ease;
+    }
+
+    .action-button:hover {
+      border-color: #fff;
+      background: #282828;
+    }
+
+    .action-button:focus-visible,
+    .text-button:focus-visible,
+    .choice input:focus-visible + span,
+    input[type="text"]:focus-visible,
+    input[type="url"]:focus-visible,
+    a:focus-visible {
+      outline: 3px solid #ef8e92;
+      outline-offset: 2px;
+    }
+
+    .action-status {
+      min-height: 28px;
+      margin: 0;
+      padding: 5px 22px 14px;
+      color: #a9a9a9;
+      font-family: var(--mono);
+      font-size: 9px;
+      text-align: center;
+    }
+
+    .assessment {
+      overflow: hidden;
+      background: var(--paper);
+      border: 1px solid #c9c5bb;
+      box-shadow: 0 18px 45px rgb(24 22 18 / 10%);
+    }
+
+    .assessment-head {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 20px;
+      align-items: start;
+      padding: 24px 26px;
+      border-bottom: 1px solid var(--line);
+      background: var(--surface);
+    }
+
+    .assessment-head h2 {
+      margin: 0 0 5px;
+      font-size: 21px;
+      letter-spacing: -0.02em;
+    }
+
+    .assessment-head p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .text-button {
+      min-height: 34px;
+      padding: 0 2px;
+      border: 0;
+      border-bottom: 1px solid var(--ink);
+      background: transparent;
+      color: var(--ink);
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .subject-fields {
+      display: grid;
+      grid-template-columns: 1fr 1.2fr;
+      gap: 16px;
+      padding: 20px 26px;
+      border-bottom: 1px solid var(--line);
+      background: #f4f2ed;
+    }
+
+    .field label {
+      display: block;
+      margin: 0 0 7px;
+      color: #5d5b55;
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .field input {
+      width: 100%;
+      height: 42px;
+      padding: 0 12px;
+      border: 1px solid #bcb8af;
+      border-radius: 0;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    .field input::placeholder { color: #9b9992; }
+
+    .column-head {
+      display: grid;
+      grid-template-columns: 54px minmax(260px, 1fr) 326px;
+      gap: 18px;
+      padding: 10px 26px;
+      border-bottom: 1px solid var(--line);
+      background: #e7e4dd;
+      color: #66645d;
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .column-head span:last-child { text-align: center; }
+
+    .flag-row {
+      min-width: 0;
+      margin: 0;
+      padding: 22px 26px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      transition: background 140ms ease;
+    }
+
+    .flag-row:last-of-type { border-bottom: 0; }
+
+    .flag-grid {
+      display: grid;
+      grid-template-columns: 54px minmax(260px, 1fr) 326px;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .flag-row[data-state="flag"] { background: var(--signal-soft); }
+    .flag-row[data-state="unknown"] { background: #fff9eb; }
+    .flag-row[data-state="clear"] { background: #f7fbf8; }
+
+    .number {
+      align-self: start;
+      color: #88867f;
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .number::after {
+      content: "";
+      display: block;
+      width: 24px;
+      height: 2px;
+      margin-top: 8px;
+      background: var(--line);
+    }
+
+    .flag-copy { min-width: 0; }
+
+    .flag-title {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 0 0 6px;
+      font-size: 15px;
+      line-height: 1.28;
+    }
+
+    .blocking-tag {
+      flex: 0 0 auto;
+      padding: 3px 5px;
+      border: 1px solid #d28f8f;
+      color: var(--signal-dark);
+      font-family: var(--mono);
+      font-size: 8px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
+
+    .flag-question {
+      max-width: 650px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .choices {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border: 1px solid #aaa69c;
+      background: #fff;
+    }
+
+    .choice { min-width: 0; }
+
+    .choice input {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .choice span {
+      display: grid;
+      min-height: 42px;
+      place-items: center;
+      border-right: 1px solid #aaa69c;
+      color: #67655f;
+      cursor: pointer;
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.035em;
+      text-align: center;
+      text-transform: uppercase;
+      transition: background 120ms ease, color 120ms ease;
+    }
+
+    .choice:last-child span { border-right: 0; }
+    .choice span:hover { background: #efede7; }
+    .choice input[value="clear"]:checked + span { background: var(--clear); color: #fff; }
+    .choice input[value="flag"]:checked + span { background: var(--signal); color: #fff; }
+    .choice input[value="unknown"]:checked + span { background: var(--amber); color: #fff; }
+
+    .method {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--ink);
+      background: var(--surface);
+    }
+
+    .method-block {
+      padding: 24px 26px;
+      border-right: 1px solid var(--line);
+    }
+
+    .method-block:last-child { border-right: 0; }
+
+    .method-kicker {
+      margin: 0 0 10px;
+      color: var(--signal-dark);
+      font-family: var(--mono);
+      font-size: 9px;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+    }
+
+    .method-block h3 {
+      margin: 0 0 7px;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .method-block p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .formula {
+      display: block;
+      margin-top: 12px;
+      padding: 10px;
+      border: 1px dashed #aaa69c;
+      background: #f5f3ee;
+      font-family: var(--mono);
+      font-size: 10px;
+      line-height: 1.5;
+    }
+
+    .service-line {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      margin-top: 18px;
+      padding: 22px 24px;
+      border: 1px solid #b9b5ac;
+      background: #f7f5f0;
+    }
+
+    .service-line p {
+      margin: 0;
+      color: #4d4b46;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .service-line strong { color: var(--ink); }
+
+    .service-link {
+      flex: 0 0 auto;
+      padding: 11px 14px;
+      border: 1px solid var(--ink);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-decoration: none;
+      text-transform: uppercase;
+    }
+
+    .service-link:hover {
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 24px;
+      margin-top: 20px;
+      color: #5e5c56;
+      font-family: var(--mono);
+      font-size: 9px;
+      line-height: 1.6;
+    }
+
+    .footer p { max-width: 740px; margin: 0; }
+
+    .pulse { animation: pulse 220ms ease-out; }
+
+    @keyframes pulse {
+      0% { opacity: 0.45; transform: translateY(3px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1100px) {
+      .workspace { grid-template-columns: 300px minmax(0, 1fr); }
+      .flag-grid, .column-head { grid-template-columns: 40px minmax(220px, 1fr); }
+      .choices { grid-column: 2; }
+      .column-head span:last-child { display: none; }
+      .flag-row { padding-top: 18px; padding-bottom: 18px; }
+    }
+
+    @media (max-width: 820px) {
+      .topbar-inner, .shell { width: min(100% - 28px, 720px); }
+      .top-links { display: none; }
+      .shell { padding-top: 28px; }
+      .intro { grid-template-columns: 1fr; gap: 18px; }
+      .intro-note { max-width: 650px; }
+      .workspace { grid-template-columns: 1fr; }
+      .result-panel { position: static; min-height: 0; }
+      .score-block { padding-top: 22px; }
+      .score strong { font-size: 70px; }
+      .subject-fields, .method { grid-template-columns: 1fr; }
+      .method-block { border-right: 0; border-bottom: 1px solid var(--line); }
+      .method-block:last-child { border-bottom: 0; }
+    }
+
+    @media (max-width: 560px) {
+      .brand-sub { display: none; }
+      h1 { font-size: 40px; }
+      .assessment-head { grid-template-columns: 1fr; padding: 20px; }
+      .assessment-head .text-button { justify-self: start; }
+      .subject-fields { padding: 18px 20px; }
+      .column-head { display: none; }
+      .flag-row { padding: 20px; }
+      .flag-grid { grid-template-columns: 32px minmax(0, 1fr); gap: 10px; }
+      .choices { grid-column: 1 / -1; margin-top: 4px; }
+      .flag-title { align-items: flex-start; flex-direction: column; }
+      .service-line { align-items: flex-start; flex-direction: column; }
+      .footer { flex-direction: column; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    @media print {
+      .topbar, .intro, .assessment, .service-line, .footer { display: none; }
+      .shell { width: 100%; padding: 0; }
+      .workspace { display: block; }
+      .result-panel {
+        position: static;
+        min-height: 0;
+        color: #000;
+        background: #fff;
+        box-shadow: none;
+      }
+      .result-head, .result-actions, .action-status { display: none; }
+      .score-label, .verdict-block p, .tally-item span { color: #333; }
+      .verdict-code { border: 1px solid #000; color: #000; background: #fff; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#assessment">Skip to assessment</a>
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand" aria-label="WrightOps">
+        <span class="brand-mark" aria-hidden="true">W/O</span>
+        <span>WrightOps</span>
+        <span class="brand-sub">Field tool 01</span>
+      </div>
+      <nav class="top-links" aria-label="Tool links">
+        <a href="BOUNTY-RED-FLAG-CARD.html">Print card</a>
+        <a href="README.md">CLI instructions</a>
+        <span>Offline / zero telemetry</span>
+      </nav>
+    </div>
+  </header>
+
+  <main class="shell">
+    <section class="intro" aria-labelledby="page-title">
+      <div>
+        <p class="eyebrow">Software bounty preflight</p>
+        <h1 id="page-title">Evidence before effort.</h1>
+      </div>
+      <div class="intro-note">
+        <strong>Twelve checks before you claim, code, spend, or share access.</strong>
+        Mark only what authoritative evidence supports. Missing evidence stays unknown—and unknown counts as a flag.
+        <div class="privacy-line">Runs entirely in this browser</div>
+      </div>
+    </section>
+
+    <div class="workspace">
+      <aside class="result-panel" aria-labelledby="result-title">
+        <div class="result-head">
+          <span>Live assessment</span>
+          <span id="result-id">BRFC / 001</span>
+        </div>
+        <div class="score-block">
+          <div class="score-label">Flagged or unknown</div>
+          <div class="score"><strong id="flag-count">12</strong><span>/ 12</span></div>
+          <div class="meter" aria-hidden="true"><div class="meter-fill" id="meter-fill"></div></div>
+        </div>
+        <div class="verdict-block" id="verdict-block" aria-live="polite" aria-atomic="true">
+          <span class="verdict-code" id="verdict-code">HARD_STOP</span>
+          <h2 id="result-title">Hard stop</h2>
+          <p id="verdict-next">Do not claim, code, spend, or share access until every hard stop has authoritative evidence.</p>
+        </div>
+        <div class="tally" aria-label="Answer totals">
+          <div class="tally-item"><strong id="clear-count">0</strong><span>Clear</span></div>
+          <div class="tally-item"><strong id="present-count">0</strong><span>Present</span></div>
+          <div class="tally-item"><strong id="unknown-count">12</strong><span>Unknown</span></div>
+        </div>
+        <div class="result-actions">
+          <button class="action-button" id="copy-button" type="button">Copy JSON</button>
+          <button class="action-button" id="download-button" type="button">Download</button>
+        </div>
+        <p class="action-status" id="action-status" role="status">Nothing is uploaded or saved.</p>
+      </aside>
+
+      <section class="assessment" id="assessment" aria-labelledby="assessment-title">
+        <div class="assessment-head">
+          <div>
+            <h2 id="assessment-title">Record what the evidence says</h2>
+            <p>“Clear” requires support. “Present” or “unknown” is counted as a flag.</p>
+          </div>
+          <button class="text-button" id="reset-button" type="button">Reset to unknown</button>
+        </div>
+
+        <div class="subject-fields">
+          <div class="field">
+            <label for="subject-label">Bounty label <span aria-hidden="true">/</span> optional</label>
+            <input id="subject-label" type="text" maxlength="140" placeholder="Issue #123 — parser fix" autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="subject-source">Public source URL <span aria-hidden="true">/</span> optional</label>
+            <input id="subject-source" type="url" maxlength="500" placeholder="https://github.com/owner/repo/issues/123" autocomplete="off">
+          </div>
+        </div>
+
+        <div class="column-head" aria-hidden="true">
+          <span>Check</span>
+          <span>Fact to resolve</span>
+          <span>Evidence state</span>
+        </div>
+
+        <fieldset class="flag-row" data-flag-id="funding" data-hard-stop="true" data-state="unknown">
+          <legend class="visually-hidden">Funding evidence</legend>
+          <div class="flag-grid">
+            <span class="number">01</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">Payout is not verifiably funded. <span class="blocking-tag">Blocking</span></h3>
+              <p class="flag-question">Can authoritative evidence show that the stated payout is funded and available?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Funding evidence state">
+              <label class="choice"><input type="radio" name="funding" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="funding" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="funding" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="availability" data-hard-stop="true" data-state="unknown">
+          <legend class="visually-hidden">Availability evidence</legend>
+          <div class="flag-grid">
+            <span class="number">02</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">The claim window is closed, expired, or ambiguous. <span class="blocking-tag">Blocking</span></h3>
+              <p class="flag-question">Is the claim window open now, with the deadline and eligibility rules confirmed?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Availability evidence state">
+              <label class="choice"><input type="radio" name="availability" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="availability" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="availability" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="competition" data-hard-stop="false" data-state="unknown">
+          <legend class="visually-hidden">Competition evidence</legend>
+          <div class="flag-grid">
+            <span class="number">03</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">Someone else is assigned or already building.</h3>
+              <p class="flag-question">Have assignees, claims, pull requests, forks, comments, and submissions been checked?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Competition evidence state">
+              <label class="choice"><input type="radio" name="competition" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="competition" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="competition" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="acceptance" data-hard-stop="false" data-state="unknown">
+          <legend class="visually-hidden">Acceptance evidence</legend>
+          <div class="flag-grid">
+            <span class="number">04</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">Acceptance criteria are missing or subjective.</h3>
+              <p class="flag-question">Are the deliverable and acceptance tests objective enough to verify before work starts?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Acceptance evidence state">
+              <label class="choice"><input type="radio" name="acceptance" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="acceptance" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="acceptance" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="authority" data-hard-stop="false" data-state="unknown">
+          <legend class="visually-hidden">Authority evidence</legend>
+          <div class="flag-grid">
+            <span class="number">05</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">The person offering payment may lack acceptance authority.</h3>
+              <p class="flag-question">Is it clear who can accept delivery, resolve disputes, and release the payout?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Authority evidence state">
+              <label class="choice"><input type="radio" name="authority" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="authority" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="authority" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="upfront-cost" data-hard-stop="true" data-state="unknown">
+          <legend class="visually-hidden">Upfront cost evidence</legend>
+          <div class="flag-grid">
+            <span class="number">06</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">You must pay, bond, purchase, or provision first. <span class="blocking-tag">Blocking</span></h3>
+              <p class="flag-question">Can the work be attempted without an unjustified bond, purchase, subscription, or spend?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Upfront cost evidence state">
+              <label class="choice"><input type="radio" name="upfront-cost" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="upfront-cost" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="upfront-cost" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="access" data-hard-stop="true" data-state="unknown">
+          <legend class="visually-hidden">Access evidence</legend>
+          <div class="flag-grid">
+            <span class="number">07</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">Delivery requires private credentials or production access. <span class="blocking-tag">Blocking</span></h3>
+              <p class="flag-question">Can the deliverable be completed without secrets, customer data, or live-system access?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Access evidence state">
+              <label class="choice"><input type="radio" name="access" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="access" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="access" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="third-party" data-hard-stop="false" data-state="unknown">
+          <legend class="visually-hidden">Third-party dependency evidence</legend>
+          <div class="flag-grid">
+            <span class="number">08</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">Payment depends on third-party adoption, promotion, or approval.</h3>
+              <p class="flag-question">Is acceptance controlled by the named payer rather than an unrelated third party?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Third-party evidence state">
+              <label class="choice"><input type="radio" name="third-party" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="third-party" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="third-party" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="scope" data-hard-stop="false" data-state="unknown">
+          <legend class="visually-hidden">Scope evidence</legend>
+          <div class="flag-grid">
+            <span class="number">09</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">The real scope exceeds the headline task.</h3>
+              <p class="flag-question">Does the estimate include setup, tests, docs, review cycles, support, and collection?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Scope evidence state">
+              <label class="choice"><input type="radio" name="scope" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="scope" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="scope" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="baseline" data-hard-stop="false" data-state="unknown">
+          <legend class="visually-hidden">Project baseline evidence</legend>
+          <div class="flag-grid">
+            <span class="number">10</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">The project baseline is unhealthy or inactive.</h3>
+              <p class="flag-question">Does the baseline build, test, and provide enough maintainer activity for acceptance?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Baseline evidence state">
+              <label class="choice"><input type="radio" name="baseline" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="baseline" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="baseline" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="rights" data-hard-stop="false" data-state="unknown">
+          <legend class="visually-hidden">Rights and compliance evidence</legend>
+          <div class="flag-grid">
+            <span class="number">11</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">Rights or compliance obligations are unclear.</h3>
+              <p class="flag-question">Are licenses, data rights, disclosure duties, taxes, and platform rules understood?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Rights evidence state">
+              <label class="choice"><input type="radio" name="rights" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="rights" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="rights" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="flag-row" data-flag-id="economics" data-hard-stop="false" data-state="unknown">
+          <legend class="visually-hidden">Economics evidence</legend>
+          <div class="flag-grid">
+            <span class="number">12</span>
+            <div class="flag-copy">
+              <h3 class="flag-title">Expected hourly return falls below your floor.</h3>
+              <p class="flag-question">After costs and payment risk, does expected return still clear the required hourly floor?</p>
+            </div>
+            <div class="choices" role="radiogroup" aria-label="Economics evidence state">
+              <label class="choice"><input type="radio" name="economics" value="clear"><span>Clear</span></label>
+              <label class="choice"><input type="radio" name="economics" value="flag"><span>Present</span></label>
+              <label class="choice"><input type="radio" name="economics" value="unknown" checked><span>Unknown</span></label>
+            </div>
+          </div>
+        </fieldset>
+
+        <div class="method">
+          <section class="method-block">
+            <p class="method-kicker">Decision rule</p>
+            <h3>Hard stops outrank the count.</h3>
+            <p>Unfunded or unavailable work, unauthorized access, prohibited conduct, and unjustified mandatory spending stay blocked until resolved.</p>
+          </section>
+          <section class="method-block">
+            <p class="method-kicker">Economics check</p>
+            <h3>Price the whole path to payment.</h3>
+            <p>Include review, revisions, communication, costs, and collection risk.</p>
+            <code class="formula">(payout × payment probability − unavoidable costs) ÷ total hours</code>
+          </section>
+        </div>
+      </section>
+    </div>
+
+    <section class="service-line" aria-label="Bounty review service">
+      <p><strong>Need the evidence sourced for you?</strong> WrightOps offers a $49 written GO / HOLD / NO-GO review for one public software bounty, after scope is confirmed.</p>
+      <a class="service-link" href="https://github.com/wrightops-ai/bounty-red-flag-card/issues/new?template=bounty-review.yml" target="_blank" rel="noreferrer">Request public scope</a>
+    </section>
+
+    <footer class="footer">
+      <p>Triage aid only—not legal, tax, financial, security, privacy, or compliance advice. A low count does not prove a bounty is safe, legal, profitable, eligible, acceptable, or payable.</p>
+      <p>WrightOps / MIT / v1.1.0</p>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const flagRows = [...document.querySelectorAll("[data-flag-id]")];
+      const flagTitles = Object.fromEntries(
+        flagRows.map((row) => [row.dataset.flagId, row.querySelector(".flag-title").childNodes[0].textContent.trim()])
+      );
+      const elements = {
+        label: document.querySelector("#subject-label"),
+        source: document.querySelector("#subject-source"),
+        flagCount: document.querySelector("#flag-count"),
+        clearCount: document.querySelector("#clear-count"),
+        presentCount: document.querySelector("#present-count"),
+        unknownCount: document.querySelector("#unknown-count"),
+        meter: document.querySelector("#meter-fill"),
+        code: document.querySelector("#verdict-code"),
+        title: document.querySelector("#result-title"),
+        next: document.querySelector("#verdict-next"),
+        status: document.querySelector("#action-status"),
+        reset: document.querySelector("#reset-button"),
+        copy: document.querySelector("#copy-button"),
+        download: document.querySelector("#download-button")
+      };
+
+      const verdicts = {
+        HARD_STOP: {
+          code: "HARD_STOP",
+          label: "Hard stop",
+          meaning: "A blocking fact or unresolved blocking uncertainty is present.",
+          nextStep: "Do not claim, code, spend, or share access until every hard stop has authoritative evidence."
+        },
+        DEFAULT_NO_GO: {
+          code: "DEFAULT_NO_GO",
+          label: "Default no-go",
+          meaning: "Four or more facts remain flagged or unknown.",
+          nextStep: "Default to no-go unless authoritative evidence materially changes the assessment."
+        },
+        HOLD_VERIFY: {
+          code: "HOLD_VERIFY",
+          label: "Hold and verify",
+          meaning: "Two or three facts remain flagged or unknown.",
+          nextStep: "Pause and resolve the named facts before committing delivery time."
+        },
+        CONTINUE_DUE_DILIGENCE: {
+          code: "CONTINUE_DUE_DILIGENCE",
+          label: "Continue due diligence",
+          meaning: "Zero or one fact remains flagged or unknown.",
+          nextStep: "Continue the full review. This result is not a GO decision and does not prove safety or payment."
+        }
+      };
+
+      function currentAnswers() {
+        return Object.fromEntries(
+          flagRows.map((row) => [row.dataset.flagId, row.querySelector("input:checked").value])
+        );
+      }
+
+      function currentReport() {
+        const answers = currentAnswers();
+        const results = flagRows.map((row) => {
+          const id = row.dataset.flagId;
+          const response = answers[id];
+          const flagged = response !== "clear";
+          return {
+            id,
+            title: flagTitles[id],
+            response,
+            flagged,
+            hardStop: row.dataset.hardStop === "true" && flagged
+          };
+        });
+        const hardStops = results.filter((result) => result.hardStop).map((result) => result.id);
+        const counts = {
+          clear: results.filter((result) => result.response === "clear").length,
+          flag: results.filter((result) => result.response === "flag").length,
+          unknown: results.filter((result) => result.response === "unknown").length,
+          totalFlagged: results.filter((result) => result.flagged).length
+        };
+        let verdict = verdicts.CONTINUE_DUE_DILIGENCE;
+        if (hardStops.length) verdict = verdicts.HARD_STOP;
+        else if (counts.totalFlagged >= 4) verdict = verdicts.DEFAULT_NO_GO;
+        else if (counts.totalFlagged >= 2) verdict = verdicts.HOLD_VERIFY;
+
+        const subject = {};
+        if (elements.label.value.trim()) subject.label = elements.label.value.trim();
+        if (elements.source.value.trim()) subject.source = elements.source.value.trim();
+
+        return {
+          schemaVersion: 1,
+          tool: "Bounty Red-Flag Card",
+          subject,
+          answers,
+          counts,
+          hardStops,
+          verdict,
+          results,
+          disclaimer: "Triage aid only. This assessment does not prove that a bounty is safe, legal, compliant, profitable, eligible, acceptable, or payable."
+        };
+      }
+
+      function animate(element) {
+        element.classList.remove("pulse");
+        void element.offsetWidth;
+        element.classList.add("pulse");
+      }
+
+      function render() {
+        const report = currentReport();
+        for (const row of flagRows) {
+          row.dataset.state = report.answers[row.dataset.flagId];
+        }
+        elements.flagCount.textContent = report.counts.totalFlagged;
+        elements.clearCount.textContent = report.counts.clear;
+        elements.presentCount.textContent = report.counts.flag;
+        elements.unknownCount.textContent = report.counts.unknown;
+        elements.meter.style.width = `${(report.counts.totalFlagged / 12) * 100}%`;
+        elements.code.textContent = report.verdict.code;
+        elements.title.textContent = report.verdict.label;
+        elements.next.textContent = report.verdict.nextStep;
+        animate(elements.flagCount);
+        animate(elements.title);
+        return report;
+      }
+
+      async function copyReport() {
+        const text = `${JSON.stringify(currentReport(), null, 2)}\n`;
+        try {
+          if (navigator.clipboard && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+          } else {
+            const fallback = document.createElement("textarea");
+            fallback.value = text;
+            fallback.setAttribute("readonly", "");
+            fallback.style.position = "fixed";
+            fallback.style.opacity = "0";
+            document.body.append(fallback);
+            fallback.select();
+            const copied = document.execCommand("copy");
+            fallback.remove();
+            if (!copied) throw new Error("Copy command unavailable");
+          }
+          elements.status.textContent = "Assessment JSON copied locally.";
+        } catch {
+          elements.status.textContent = "Copy was blocked. Use Download instead.";
+        }
+      }
+
+      function downloadReport() {
+        const report = currentReport();
+        const data = `${JSON.stringify(report, null, 2)}\n`;
+        const blob = new Blob([data], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement("a");
+        const slug = (report.subject.label || "bounty-assessment")
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-|-$/g, "")
+          .slice(0, 60) || "bounty-assessment";
+        anchor.href = url;
+        anchor.download = `${slug}.json`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        elements.status.textContent = "Assessment JSON downloaded locally.";
+      }
+
+      function resetAssessment() {
+        for (const row of flagRows) {
+          row.querySelector('input[value="unknown"]').checked = true;
+        }
+        elements.label.value = "";
+        elements.source.value = "";
+        elements.status.textContent = "Reset. Nothing is uploaded or saved.";
+        render();
+        flagRows[0].querySelector('input[value="clear"]').focus();
+      }
+
+      for (const row of flagRows) {
+        row.addEventListener("change", render);
+      }
+      elements.label.addEventListener("input", render);
+      elements.source.addEventListener("input", render);
+      elements.copy.addEventListener("click", copyReport);
+      elements.download.addEventListener("click", downloadReport);
+      elements.reset.addEventListener("click", resetAssessment);
+      render();
+    })();
+  </script>
+</body>
+</html>

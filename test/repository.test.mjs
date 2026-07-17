@@ -47,3 +47,10 @@ test("README preview is a checked 1200 by 800 PNG", async () => {
   assert.equal(preview.readUInt32BE(16), 1200);
   assert.equal(preview.readUInt32BE(20), 800);
 });
+
+test("GitHub Pages launcher routes to the executable app without scripting", async () => {
+  const launcher = await readFile(new URL("index.html", root), "utf8");
+  assert.match(launcher, /http-equiv="refresh" content="0; url=\.\/bounty-red-flag-card\/"/);
+  assert.match(launcher, /href="\.\/bounty-red-flag-card\/"/);
+  assert.doesNotMatch(launcher, /<script\b/i);
+});

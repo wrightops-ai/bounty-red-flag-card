@@ -1,11 +1,15 @@
 {
   "name": "bounty-red-flag-card",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
   "description": "A free 12-point preflight card for evaluating software bounty risk.",
   "type": "module",
+  "bin": {
+    "bounty-red-flag-card": "./cli.mjs"
+  },
   "scripts": {
     "build:release": "node ../release-builder.mjs .",
+    "cli": "node cli.mjs",
     "test": "node --test",
     "validate": "node scripts/validate.mjs && node ../release-builder.mjs --verify ."
   },
