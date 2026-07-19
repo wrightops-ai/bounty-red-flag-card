@@ -54,6 +54,14 @@ test("interactive app is a runnable, offline, accessible assessment", async () =
   assert.doesNotMatch(html, /\b(?:analytics|gtag|segment|mixpanel|hotjar)\s*\(/i);
 });
 
+test("interactive app routes high-intent users through the complete offer page", async () => {
+  const html = await readFile(new URL("index.html", root), "utf8");
+
+  assert.match(html, /https:\/\/zachwright\.xyz\/bounty-go-no-go-review\//);
+  assert.match(html, />See the \$49 review and request scope</);
+  assert.doesNotMatch(html, /issues\/new\?template=bounty-review\.yml/);
+});
+
 test("decision engine treats missing evidence as flagged and blocking where required", () => {
   const report = assessBounty({});
   assert.deepEqual(report.counts, { clear: 0, flag: 0, unknown: 12, totalFlagged: 12 });

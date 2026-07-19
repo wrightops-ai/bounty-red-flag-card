@@ -87,8 +87,8 @@
       },
       {
         "path": "index.html",
-        "sha256": "a5564a30fefcdd2b603ef3283b0af3bdf9a105366c403590e1dc300ad1ab2f78",
-        "bytes": 44289,
+        "sha256": "931df1aeffc792aae4965fa139e1073e3368bc37f033f4a2527a0ca5d26ead78",
+        "bytes": 44261,
         "archiveMode": "0644"
       },
       {
@@ -123,8 +123,8 @@
       },
       {
         "path": "test/product.test.mjs",
-        "sha256": "dcd647719e42dc5e76226c54c6fc5d748f7db1131a5d8e39332b29f25d8ad9a9",
-        "bytes": 6647,
+        "sha256": "26ae8d88b46f1f277b10669681dc474aa394d78afbf417b5af798f6d6ca5e815",
+        "bytes": 7031,
         "archiveMode": "0644"
       }
     ],
