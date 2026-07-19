@@ -17,10 +17,12 @@ test("sample review is explicitly synthetic and demonstrates a bounded decision"
   assert.match(sample, /does not claim the bounty/);
 });
 
-test("README discloses the GitHub sign-in gate and links the sample", async () => {
+test("README routes buyers through the complete offer before the GitHub sign-in gate", async () => {
   const readme = await readFile(new URL("README.md", root), "utf8");
 
-  assert.match(readme, /public GitHub request form \(sign-in required\)/);
+  assert.match(readme, /https:\/\/zachwright\.xyz\/bounty-go-no-go-review\//);
+  assert.match(readme, /GitHub sign-in is required only when you open the public request/);
+  assert.doesNotMatch(readme, /issues\/new\?template=bounty-review\.yml/);
   assert.match(readme, /sample GO\/HOLD\/NO-GO report/);
   assert.match(readme, /Do not pay before WrightOps confirms/);
 });
